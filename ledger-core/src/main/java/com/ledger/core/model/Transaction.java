@@ -33,6 +33,7 @@ public class Transaction {
 
     /* type of transaction */
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionType type;
 
     /* state of transaction */
@@ -54,7 +55,7 @@ public class Transaction {
 
     /* prevent race conditions */
     @Version
-    private Long Version;
+    private Long version;
 
     /* transaction reference */
     @Column(nullable = false, unique = true)
@@ -73,5 +74,65 @@ public class Transaction {
     @PrePersist
     void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    /* getters */
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public TransactionType getTransactionType() {
+        return type;
+    }
+
+    public TransactionStatus getTransactionStatus() {
+        return status;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public UUID getInitiatedBy() {
+        return initiatedBy;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public String getTransactionReference() {
+        return transactionReference;
+    }
+
+    public Account getReferenceAccount() {
+        return referenceAccount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getPostedAt() {
+        return postedAt;
+    }
+
+    /* setters */
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPostedAt(LocalDateTime postedAt) {
+        this.postedAt = postedAt;
     }
 }

@@ -46,4 +46,25 @@ public class IdempotencyKey {
         this.createdAt = LocalDateTime.now();
     }
 
+    /* getters */
+
+    public String getKey() {
+        return key;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getRequestHash() {
+        return requestHash;
+    }
+
+    public IdempotencyStatus getStatus() {
+        return status;
+    }
 }

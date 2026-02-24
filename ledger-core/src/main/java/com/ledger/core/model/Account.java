@@ -70,4 +70,60 @@ public class Account {
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    /* getters */
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public AccountStatus getAccountStatus() {
+        return status;
+    }
+
+    public AccountType getAccountType() {
+        return type;
+    }
+
+    public NormalBalance getNormalBalance() {
+        return normalBalance;
+    }
+
+    public AccountCategory getAccountCategory() {
+        return accountCategory;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    /* setters */
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAccountStatusActivate() {
+        this.status = AccountStatus.ACTIVE;
+    }
+
+    public void setAccountStatusFreeze() {
+        this.status = AccountStatus.FROZEN;
+    }
+
+    public void setAccountStatusClose() {
+        this.status = AccountStatus.CLOSED;
+    }
 }

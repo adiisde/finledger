@@ -53,4 +53,34 @@ public class AuditLog {
     void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    /* getters */
+
+    public UUID getId() {
+        return id;
+    }
+
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
+    public UUID getEntityId() {
+        return entityId;
+    }
+
+    public AuditAction getAction() {
+        return action;
+    }
+
+    public String getPerformedBy() {
+        return performedBy;
+    }
+
+    public String getMetaData() {
+        return metadata;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

@@ -52,4 +52,29 @@ public class LedgerEntry {
         this.createdAt = LocalDateTime.now();
     }
 
+    /* getters */
+
+    public UUID getId() {
+        return id;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public EntryType getEntryType() {
+        return entryType;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

@@ -59,4 +59,40 @@ public class AccountBalance {
     void onUpdate() {
         this.lastUpdatedAt = LocalDateTime.now();
     }
+
+    /* getters */
+
+    public UUID getAccountId() {
+        return accountId;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public BigDecimal getAvailableBalance() {
+        return availableBalance;
+    }
+
+    public UUID getLastLedgerEntryId() {
+        return lastLedgerEntryId;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public LocalDateTime getLastUpdatedAt() {
+        return lastUpdatedAt;
+    }
+
+    /* setters */
+
+    public void setLedgerUpdate(BigDecimal availableNewBalance, BigDecimal totalNewBalance, UUID ledgerEntryId) {
+        this.availableBalance = availableNewBalance;
+        this.totalBalance = totalNewBalance;
+        this.lastLedgerEntryId = ledgerEntryId;
+    }
+
+
 }

@@ -48,4 +48,26 @@ public class TransactionLink {
     void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    /* getters */
+
+    public UUID getId() {
+        return id;
+    }
+
+    public Transaction getOriginalTransaction() {
+        return originalTransaction;
+    }
+
+    public Transaction getNewTransaction() {
+        return newTransaction;
+    }
+
+    public LinkType getLinkType() {
+        return linkType;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
