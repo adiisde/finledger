@@ -76,6 +76,21 @@ public class Transaction {
         this.createdAt = LocalDateTime.now();
     }
 
+    /* constructor for transaction creation */
+
+    public Transaction(String idempotencyKey, TransactionType type, TransactionStatus status, BigDecimal amount,
+            UUID initiatedBy, String transactionReference, Account referenceAccount) {
+        this.amount = amount;
+        this.idempotencyKey = idempotencyKey;
+        this.initiatedBy = initiatedBy;
+        this.transactionReference = transactionReference;
+        this.type = type;
+        this.referenceAccount = referenceAccount;
+        this.status = status;
+    }
+
+    protected Transaction() {};
+
     /* getters */
 
     public UUID getId() {
@@ -134,5 +149,9 @@ public class Transaction {
 
     public void setPostedAt(LocalDateTime postedAt) {
         this.postedAt = postedAt;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
     }
 }

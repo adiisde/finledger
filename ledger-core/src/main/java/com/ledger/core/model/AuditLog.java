@@ -54,6 +54,18 @@ public class AuditLog {
         this.createdAt = LocalDateTime.now();
     }
 
+    /* constructor for creation of log */
+
+    public AuditLog(AuditAction action, EntityType entityType, UUID entityId, String performedBy, String metadata) {
+        this.entityId = entityId;
+        this.action = action;
+        this.entityType = entityType;
+        this.performedBy = performedBy;
+        this.metadata = metadata;
+    }
+
+    protected AuditLog() {};
+
     /* getters */
 
     public UUID getId() {

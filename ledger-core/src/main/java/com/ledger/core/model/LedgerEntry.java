@@ -52,6 +52,17 @@ public class LedgerEntry {
         this.createdAt = LocalDateTime.now();
     }
 
+    /* constructor for ledger entry */
+
+    public LedgerEntry(Transaction transaction, Account account, EntryType entryType, BigDecimal amount) {
+        this.account = account;
+        this.transaction = transaction;
+        this.entryType = entryType;
+        this.amount = amount;
+    }
+
+    protected LedgerEntry() {};
+
     /* getters */
 
     public UUID getId() {

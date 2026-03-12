@@ -46,6 +46,27 @@ public class IdempotencyKey {
         this.createdAt = LocalDateTime.now();
     }
 
+    /* constructor for creation of key */
+
+    public IdempotencyKey(String key, String requestHash) {
+        this.key = key;
+        this.requestHash = requestHash;
+        this.status = IdempotencyStatus.IN_PROGRESS;
+    }
+
+    protected IdempotencyKey() {};
+
+    /* actions used in idempotency service */
+
+    public void markCompleted(Transaction transaction) {
+        this.transaction = transaction;
+        this.status = IdempotencyStatus.COMPLETED;
+    }
+
+    public void markFailed() {
+        this.status = IdempotencyStatus.FAILED;
+    }
+
     /* getters */
 
     public String getKey() {
