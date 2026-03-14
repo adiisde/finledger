@@ -60,6 +60,17 @@ public class AccountBalance {
         this.lastUpdatedAt = LocalDateTime.now();
     }
 
+    /* constructor for account balance on the account creation */
+
+    public AccountBalance(Account account, BigDecimal availableBalance, BigDecimal totalBalance) {
+        this.totalBalance = totalBalance;
+        this.availableBalance = availableBalance;
+        this.account = account;
+        this.accountId = account.getId();
+    }
+
+    protected AccountBalance() {};
+
     /* getters */
 
     public UUID getAccountId() {
@@ -86,6 +97,10 @@ public class AccountBalance {
         return lastUpdatedAt;
     }
 
+    public BigDecimal getTotalBalance() {
+        return totalBalance;
+    }
+
     /* setters */
 
     public void setLedgerUpdate(BigDecimal availableNewBalance, BigDecimal totalNewBalance, UUID ledgerEntryId) {
@@ -93,6 +108,5 @@ public class AccountBalance {
         this.totalBalance = totalNewBalance;
         this.lastLedgerEntryId = ledgerEntryId;
     }
-
 
 }

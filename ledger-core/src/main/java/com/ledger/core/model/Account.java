@@ -71,6 +71,19 @@ public class Account {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /* constructor for account creation */
+
+    public Account(String accountNumber, String name, AccountType accountType, AccountCategory accountCategory, NormalBalance normalBalance) {
+        this.accountCategory = accountCategory;
+        this.accountNumber = accountNumber;
+        this.normalBalance = normalBalance;
+        this.type = accountType;
+        this.status = AccountStatus.ACTIVE;
+        this.name = name;
+    }
+
+    protected Account() {};
+
     /* getters */
 
     public UUID getId() {
