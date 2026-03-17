@@ -1,0 +1,33 @@
+package com.ledger.core.dto.api;
+
+import java.time.LocalDateTime;
+
+public class ApiResponse<T> {
+    private boolean success;
+    private String message;
+    private T data;
+    private LocalDateTime timestamp;
+
+    public ApiResponse(boolean success, String message, T data) {
+        this.success = success;
+        this.data = data;
+        this.message = message;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+}
