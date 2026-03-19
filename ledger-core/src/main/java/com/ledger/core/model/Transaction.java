@@ -55,7 +55,7 @@ public class Transaction {
 
     /* prevent race conditions */
     @Version
-    private Long version;
+    private Long Version;
 
     /* transaction reference */
     @Column(nullable = false, unique = true)
@@ -122,7 +122,7 @@ public class Transaction {
     }
 
     public Long getVersion() {
-        return version;
+        return Version;
     }
 
     public String getTransactionReference() {

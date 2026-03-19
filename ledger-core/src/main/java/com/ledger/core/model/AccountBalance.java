@@ -43,7 +43,7 @@ public class AccountBalance {
 
     /* prevents against race conditions */
     @Version
-    private Long version;
+    private Long Version;
 
     /* timestamps */
     @Column(nullable = false)
@@ -90,7 +90,7 @@ public class AccountBalance {
     }
 
     public Long getVersion() {
-        return version;
+        return Version;
     }
 
     public LocalDateTime getLastUpdatedAt() {
