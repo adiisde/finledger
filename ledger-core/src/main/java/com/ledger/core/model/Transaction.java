@@ -28,7 +28,7 @@ public class Transaction {
     private UUID id;
 
     /* track requests to avoid duplicates */
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(nullable = false, updatable = false)
     private String idempotencyKey;
 
     /* type of transaction */
