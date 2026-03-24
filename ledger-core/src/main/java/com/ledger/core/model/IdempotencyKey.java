@@ -25,7 +25,7 @@ public class IdempotencyKey {
 
     /* transaction created for the request */
     @OneToOne(optional = false)
-    @JoinColumn(name = "transaction_id", nullable = false, unique = true)
+    @JoinColumn(name = "transaction_id", nullable = true, unique = true)
     private Transaction transaction;
 
     /* timestamps */
