@@ -38,12 +38,12 @@ public class AccountBalance {
     private BigDecimal totalBalance;
 
     /* last ledger used to calculate the balance */
-    @Column(nullable = false)
+    @Column(nullable = true)
     private UUID lastLedgerEntryId;
 
     /* prevents against race conditions */
     @Version
-    private Long Version;
+    private Long version;
 
     /* timestamps */
     @Column(nullable = false)
@@ -90,7 +90,7 @@ public class AccountBalance {
     }
 
     public Long getVersion() {
-        return Version;
+        return version;
     }
 
     public LocalDateTime getLastUpdatedAt() {
@@ -106,7 +106,10 @@ public class AccountBalance {
     public void setLedgerUpdate(BigDecimal availableNewBalance, BigDecimal totalNewBalance, UUID ledgerEntryId) {
         this.availableBalance = availableNewBalance;
         this.totalBalance = totalNewBalance;
-        this.lastLedgerEntryId = ledgerEntryId;
+        
+        if (ledgerEntryId != null) {
+            this.lastLedgerEntryId = ledgerEntryId;
+        }
     }
 
 }
