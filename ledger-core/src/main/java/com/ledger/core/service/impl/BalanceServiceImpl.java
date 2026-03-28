@@ -6,7 +6,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ledger.core.enums.ledger.EntryType;
 import com.ledger.core.exception.InsufficientBalanceException;
+import com.ledger.core.model.Account;
 import com.ledger.core.model.AccountBalance;
 import com.ledger.core.repository.AccountBalanceRepository;
 import com.ledger.core.service.BalanceService;
@@ -22,6 +24,7 @@ public class BalanceServiceImpl implements BalanceService {
     /* get balance */
 
     @Override
+    @Transactional
     public AccountBalance getBalance(UUID accountId) {
         return balanceRepo.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("Balance not found"));
     }
@@ -30,16 +33,29 @@ public class BalanceServiceImpl implements BalanceService {
 
     @Override
     @Transactional
-    public void applyLedgerImpact(UUID accountId, BigDecimal delta, UUID ledgerEntryId) {
-        AccountBalance balance = balanceRepo.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("Account balance not found"));
+    public void applyLedgerImpact(Account account, BigDecimal amount, EntryType entryType, UUID ledgerEntryId) {
 
-        BigDecimal newAvailable = balance.getAvailableBalance().add(delta);
-        BigDecimal newTotal = balance.getTotalBalance().add(delta);
+        AccountBalance balance = balanceRepo.findByAccountId(account.getId())
+                .orElseThrow(() -> new IllegalStateException("Balance not found for account: " + account.getId()));
 
-        if (newAvailable.compareTo(BigDecimal.ZERO) < 0) throw new InsufficientBalanceException("Insufficient balance");
+        BigDecimal newAvailable;
+        BigDecimal newTotal;
+
+        if (entryType == EntryType.DEBIT) {
+            if (balance.getAvailableBalance().compareTo(amount) < 0)
+                throw new InsufficientBalanceException("Insufficient balance");
+
+            newAvailable = balance.getAvailableBalance().subtract(amount);
+            newTotal = balance.getTotalBalance().subtract(amount);
+        } else if (entryType == EntryType.CREDIT) {
+            newAvailable = balance.getAvailableBalance().add(amount);
+            newTotal = balance.getTotalBalance().add(amount);
+        } else {
+            throw new IllegalStateException("Invalid entry type");
+        }
 
         balance.setLedgerUpdate(newAvailable, newTotal, ledgerEntryId);
-
         balanceRepo.save(balance);
+        return;
     }
 }
