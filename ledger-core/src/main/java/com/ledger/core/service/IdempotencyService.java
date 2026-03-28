@@ -7,4 +7,5 @@ public interface IdempotencyService {
     IdempotencyKey validateOrCreateKey(String key, String requestHash);
 
     void markCompleted(IdempotencyKey key, Transaction transaction);
+    void markFailed(IdempotencyKey key);
 }
