@@ -38,7 +38,7 @@ public class LedgerServiceImpl implements LedgerService {
         LedgerEntry entry = new LedgerEntry(transaction, account, EntryType.CREDIT, amount);
         
         ledgerEntryRepo.save(entry);
-        balanceService.applyLedgerImpact(accountId, amount, entry.getId());
+        balanceService.applyLedgerImpact(account, amount, EntryType.CREDIT, entry.getId());
     }
 
     @Override
@@ -50,6 +50,6 @@ public class LedgerServiceImpl implements LedgerService {
         LedgerEntry entry = new LedgerEntry(transaction, account, EntryType.DEBIT, amount);
     
         ledgerEntryRepo.save(entry);
-        balanceService.applyLedgerImpact(accountId, amount, entry.getId());
+        balanceService.applyLedgerImpact(account, amount, EntryType.DEBIT, entry.getId());
     }
 }
