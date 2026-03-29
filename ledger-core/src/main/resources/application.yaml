@@ -1,3 +1,40 @@
 spring:
-  application:
-    name: ledger-core
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finledger
+    username: ledger_user
+    password: ledger1224
+    driver-class-name: org.postgresql.Driver
+
+    # Connection pool
+    hikari:
+      maximum-pool-size: 20       # max connections
+      minimum-idle: 5             # min idle connections
+      idle-timeout: 300000        # 5 min
+      max-lifetime: 1800000       # 30 min
+      connection-timeout: 30000   # 30 sec
+      pool-name: FinLedgerHikari
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        '[format_sql]': false
+        '[use_sql_comments]': false
+
+  sql:
+    init:
+      mode: never
+
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8066
+
+logging:
+  level:
+    root: ERROR                 # off all Spring boot default logging except errors
+    '[org.hibernate.SQL]': OFF      # disable SQL logs
+    '[org.hibernate.type.descriptor.sql.BasicBinder]': OFF # disable parameter binding logs
