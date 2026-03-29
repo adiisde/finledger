@@ -10,21 +10,26 @@ import com.ledger.core.enums.accounts.AccountCategory;
 import com.ledger.core.enums.accounts.AccountStatus;
 import com.ledger.core.enums.accounts.AccountType;
 import com.ledger.core.enums.accounts.NormalBalance;
+import com.ledger.core.enums.logs.AuditAction;
+import com.ledger.core.enums.logs.EntityType;
 import com.ledger.core.exception.AccountNotFoundException;
 import com.ledger.core.model.Account;
 import com.ledger.core.model.AccountBalance;
 import com.ledger.core.repository.AccountBalanceRepository;
 import com.ledger.core.repository.AccountRepository;
 import com.ledger.core.service.AccountService;
+import com.ledger.core.service.AuditService;
 
 @Service
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepo;
+    private final AuditService auditService;
     private final AccountBalanceRepository accountBalanceRepo;
 
-    public AccountServiceImpl(AccountRepository accountRepository, AccountBalanceRepository accountBalanceRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository, AuditService auditService, AccountBalanceRepository accountBalanceRepo) {
         this.accountRepo = accountRepository;
-        this.accountBalanceRepo = accountBalanceRepository;
+        this.auditService = auditService;
+        this.accountBalanceRepo = accountBalanceRepo;
     }
 
     /* gets account with id */
@@ -54,9 +59,11 @@ public class AccountServiceImpl implements AccountService {
         Account account = new Account(accountNumber, name, type, category, normalBalance);
 
         account = accountRepo.save(account);
-        AccountBalance balance = new AccountBalance(account, BigDecimal.ZERO, BigDecimal.ZERO);
+        auditService.logAction(AuditAction.CREATE, EntityType.ACCOUNT, account.getId(), account.getId().toString(), "account created");
 
+        AccountBalance balance = new AccountBalance(account, BigDecimal.valueOf(0), BigDecimal.valueOf(0));
         accountBalanceRepo.save(balance);
+
         return account;
     }
 
