@@ -61,26 +61,39 @@ public class TransactionServiceImpl implements TransactionService {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }
-        
-        String requestHash = accountId + "-" + amount + "-DEPOSIT";
 
-        Account account = accountService.getAccountById(accountId);
-        Transaction txn = new Transaction(idempotencyKey, TransactionType.DEPOSIT, TransactionStatus.PENDING, amount,
-                initiatedBy, generateReference(), account);
+        String requestHash = accountId + "-" + amount + "-DEPOSIT";
 
         IdempotencyKey txnKeyRecord = idempotencyService.validateOrCreateKey(idempotencyKey, requestHash);
         if (txnKeyRecord.getStatus().equals(IdempotencyStatus.COMPLETED)) {
             return txnKeyRecord.getTransaction();
         }
 
-        transactionRepo.save(txn);
-        ledgerService.credit(accountId, amount, txn);
+        Account account = accountService.getAccountById(accountId);
+        if (account == null)
+            throw new IllegalArgumentException("Account is required");
 
-        txn.setStatus(TransactionStatus.POSTED);
-        txn.setPostedAt(LocalDateTime.now());
+        Transaction txn = new Transaction(idempotencyKey, TransactionType.DEPOSIT, TransactionStatus.PENDING, amount,
+                initiatedBy, generateReference(), account);
 
         transactionRepo.save(txn);
-        idempotencyService.markCompleted(txnKeyRecord, txn);
+
+        try {
+            ledgerService.credit(accountId, amount, txn);
+
+            txn.setStatus(TransactionStatus.POSTED);
+            txn.setPostedAt(LocalDateTime.now());
+
+            idempotencyService.markCompleted(txnKeyRecord, txn);
+        } catch (Exception e) {
+            txn.setStatus(TransactionStatus.FAILED);
+            transactionRepo.save(txn);
+
+            idempotencyService.markFailed(txnKeyRecord);
+            throw e;
+        }
+
+        transactionRepo.saveAndFlush(txn);
 
         auditService.logAction(AuditAction.CREATE, EntityType.TRANSACTION, txn.getId(), initiatedBy.toString(),
                 "deposit of " + amount + " to account " + accountId);
@@ -97,28 +110,44 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Amount must be positive");
         }
 
-        String requestHash = accountId + "-" + amount + "-WITHDRAW";
+        Transaction txn;
 
-        Account account = accountService.getAccountById(accountId);
-        Transaction txn = new Transaction(idempotencyKey, TransactionType.WITHDRAWAL, TransactionStatus.PENDING, amount,
-                initiatedBy, generateReference(), account);
+        String requestHash = accountId + "-" + amount + "-WITHDRAW";
 
         IdempotencyKey txnKeyRecord = idempotencyService.validateOrCreateKey(idempotencyKey, requestHash);
         if (txnKeyRecord.getStatus().equals(IdempotencyStatus.COMPLETED)) {
             return txnKeyRecord.getTransaction();
         }
 
-        transactionRepo.save(txn);
-        ledgerService.debit(accountId, amount, txn);
+        Account account = accountService.getAccountById(accountId);
+        if (account == null)
+            throw new IllegalArgumentException("Account is required");
 
-        txn.setStatus(TransactionStatus.POSTED);
-        txn.setPostedAt(LocalDateTime.now());
+        txn = new Transaction(idempotencyKey, TransactionType.WITHDRAWAL, TransactionStatus.PENDING, amount,
+                initiatedBy, generateReference(), account);
 
         transactionRepo.save(txn);
-        idempotencyService.markCompleted(txnKeyRecord, txn);
+
+        try {
+            ledgerService.debit(accountId, amount, txn);
+
+            txn.setStatus(TransactionStatus.POSTED);
+            txn.setPostedAt(LocalDateTime.now());
+
+            idempotencyService.markCompleted(txnKeyRecord, txn);
+        } catch (Exception e) {
+
+            txn.setStatus(TransactionStatus.FAILED);
+            transactionRepo.save(txn);
+
+            idempotencyService.markFailed(txnKeyRecord);
+            throw e;
+        }
+
+        transactionRepo.saveAndFlush(txn);
 
         auditService.logAction(AuditAction.CREATE, EntityType.TRANSACTION, txn.getId(), initiatedBy.toString(),
-                "Withdrawal of " + amount + " from account " + accountId);
+                "withdrawal of " + amount + " from account " + accountId);
 
         return txn;
     }
@@ -134,46 +163,74 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Amount must be positive");
         }
 
+        if (fromAccountId.equals(toAccountId)) {
+            throw new IllegalArgumentException("Can't perform transfer to own");
+        }
+
         String requestHash = fromAccountId + "-" + toAccountId + "-" + amount + "-TRANSFER";
 
-        Account sender = accountService.getAccountById(fromAccountId);
-        Account receiver = accountService.getAccountById(toAccountId);
-
-        /* debit transaction */
-
-        Transaction debitTxn = new Transaction(idempotencyKey, TransactionType.TRANSFER, TransactionStatus.PENDING,
-                amount, initiatedBy, generateReference(), sender);
-
         IdempotencyKey txnKeyRecord = idempotencyService.validateOrCreateKey(idempotencyKey, requestHash);
+
         if (txnKeyRecord.getStatus().equals(IdempotencyStatus.COMPLETED)) {
             return txnKeyRecord.getTransaction();
         }
 
-        transactionRepo.save(debitTxn);
+        UUID first = fromAccountId.compareTo(toAccountId) < 0 ? fromAccountId : toAccountId;
+        UUID second = fromAccountId.compareTo(toAccountId) < 0 ? toAccountId : fromAccountId;
 
-        ledgerService.debit(fromAccountId, amount, debitTxn);
-        debitTxn.setStatus(TransactionStatus.POSTED);
-        debitTxn.setPostedAt(LocalDateTime.now());
-        transactionRepo.save(debitTxn);
+        Account firstAccount = accountService.getAccountById(first);
+        Account secondAccount = accountService.getAccountById(second);
 
-        /* credit transaction */
+        Account sender = fromAccountId.equals(first) ? firstAccount : secondAccount;
+        Account receiver = fromAccountId.equals(first) ? secondAccount : firstAccount;
+
+        /* transactions */
+
+        Transaction debitTxn = new Transaction(idempotencyKey, TransactionType.TRANSFER, TransactionStatus.PENDING,
+                amount, initiatedBy, generateReference(), sender);
 
         Transaction creditTxn = new Transaction(idempotencyKey, TransactionType.TRANSFER, TransactionStatus.PENDING,
                 amount, initiatedBy, generateReference(), receiver);
 
-        transactionRepo.save(creditTxn);
-        ledgerService.credit(toAccountId, amount, creditTxn);
-        creditTxn.setStatus(TransactionStatus.POSTED);
-        creditTxn.setPostedAt(LocalDateTime.now());
+        transactionRepo.save(debitTxn);
         transactionRepo.save(creditTxn);
 
-        /* link transaction */
+        /* critical update */
 
-        idempotencyService.markCompleted(txnKeyRecord, debitTxn);
+        try {
+            ledgerService.debit(fromAccountId, amount, debitTxn);
+            ledgerService.credit(toAccountId, amount, creditTxn);
+
+            LocalDateTime now = LocalDateTime.now();
+
+            debitTxn.setStatus(TransactionStatus.POSTED);
+            debitTxn.setPostedAt(now);
+
+            creditTxn.setStatus(TransactionStatus.POSTED);
+            creditTxn.setPostedAt(now);
+
+            idempotencyService.markCompleted(txnKeyRecord, debitTxn);
+        } catch (Exception e) {
+            debitTxn.setStatus(TransactionStatus.FAILED);
+            creditTxn.setStatus(TransactionStatus.FAILED);
+
+            transactionRepo.save(debitTxn);
+            transactionRepo.save(creditTxn);
+            throw e;
+        }
+
+        transactionRepo.save(debitTxn);
+        transactionRepo.save(creditTxn);
+
+        /* idempotency mark and link transaction */
+
         transactionLinkService.createTransactionLink(debitTxn, creditTxn, LinkType.TRANSFER);
 
+        transactionRepo.flush();
+
         auditService.logAction(AuditAction.CREATE, EntityType.TRANSACTION, debitTxn.getId(), initiatedBy.toString(),
-                "transfer transaction");
+                "transfer " + amount + " from " + fromAccountId + " to " + toAccountId);
+
         return debitTxn;
     }
 
