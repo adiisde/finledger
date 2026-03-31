@@ -1,21 +1,21 @@
-## FinLedger - Payment Ledger Engine
+# FinLedger - Payment Ledger Engine
 
-### Overview
+## Overview
+
 FinLedger is fault-tolerant, ACID-compliant(usage) double-entry accounting engine designed for high concurrency environments.
 
 It guarantees **exactly-once transaction processing**, **consistent balances** in legder and transaction tables and provide **idempotent APIs** for safe retries under concurrency.
 
----
+## Highlights
 
-### Highlights
 - Double-entry ledger for accurate accounting.
 - Idempotent and thread-safe APIs.
 - Optimistic locking and transactional consistency.
 - Audit logging and transaction linking.
 
----
 
-### Features
+## Features
+
 - **Accounts & Balances:** Create new account, fetch that account information, check balance for that account.
 - **Transaction & Ledger Entries:** Main sources for money movement from A account to B account or on own account, it records debits & credits in double-entry format.
 - **Idempotent Protection:** Prevents the duplicate requests processing.
@@ -23,9 +23,8 @@ It guarantees **exactly-once transaction processing**, **consistent balances** i
 - **Controllers & DTOs:** API layer with clean data abstraction (for request & response) for performing operations.
 - **Global Exception Handling:** Meaningful error responses.
 
----
 
-### Tech Stack
+## Tech Stack
 
 - **Language:** Java 17
 - **Framework:** Spring Boot 3
@@ -34,17 +33,14 @@ It guarantees **exactly-once transaction processing**, **consistent balances** i
 - **Testing:** JUnit 5, k6 (load testing, most used)
 - **Build Tool:** Maven
 
----
+## Key Principles
 
-### Key Principles
 - **Double-Entry Accounting:** Every transaction updates (for transfer method) two sides (debit/credit) for money movement consistency.
 - **Idempotent:** Prevent duplicate transactions during retries or network issues.
 - **Optimistic Locking:** Ensure no lost updates during concurrent operations.
 - **ACID Compaliance:** Guarantees consistency under high load.
 
----
-
-### Installation
+## Installation
 
 1. **Prerequisites**
 - Java 17
@@ -70,9 +66,7 @@ mvn spring-boot:run
 
 - Access APIs at: ``http://localhost:8066``
 
----
-
-### APIs Routes
+## APIs Routes
 
 - Transfer: ``POST /account/transaction/transfer``
 - Deposit: ``POST /account/transaction/deposit``
@@ -89,9 +83,8 @@ mvn spring-boot:run
     "initiatedBy": "<UUID who sending money>"
 }
 ```
----
 
-### Testing and Load Testing
+## Testing
 
 - Unit tests: ``mvn test``
 - Load Testing (with k6 scripts and run when server is running) in `cd /tests` and run `k6 run stress.js`
