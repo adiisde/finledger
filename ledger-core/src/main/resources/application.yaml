@@ -31,7 +31,7 @@ spring:
     allow-bean-definition-overriding: true
 
 server:
-  port: 8066
+  port: 9090
 
 logging:
   level:
